@@ -25,12 +25,23 @@ import pygame
 
 pause_threshhold = 100  # ms of no motion for the mouse to be 'stopped'
 
+class Move:
+    """Represents one continuous movement of the mouse"""
+    def __init__(self, v = (0,0)):
+        self.x,self.y = v
+    def __iadd__(self,other):
+        self.x += other.x
+        self.y += other.y
+        return self
+    def __str__(self):
+        return '('+str(self.x)+','+str(self.y)+')'
+
 class MouseTrack:
     """Process mouse motion into discrete vectors separated by pauses"""
     def __init__(self):
         self.still = True
         self.stilltime = 0
-        self.vector = (0,0)
+        self.vector = Move()
 
     def tick(self,elapsed):
         """Call periodically."""
@@ -40,8 +51,9 @@ class MouseTrack:
             if not self.still and self.stilltime > pause_threshhold:
                 print 'moved by:',self.vector
                 self.still = True
-                self.vector = (0,0)
+                self.vector = Move()
         else:
-            self.vector = tuple(map(sum,zip(self.vector,rel))) # addition hack
+            self.vector += Move(rel)
+            # self.vector = tuple(map(sum,zip(self.vector,rel))) # addition hack
             self.still = False
             self.stilltime = 0

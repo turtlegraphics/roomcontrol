@@ -1,15 +1,35 @@
-#
-# Virtual Ouija
-#
-#   Program to detect motion by a mouse on a Ouija board.
-#   Also displays a timer
-#
-#   Bryan Clair
-#   2014
-#
+"""
+roomcontrol
+
+Program to operate a locked room puzzle game.
+
+- Displays the game's countdown timer.
+
+- Handles mouse tracking for one of the game puzzles.
+  The mouse is moved on a Ouija board and the program detects if certain
+  words have been spelled, then plays a prerecorded sound.
+
+Copyright (C) 2014 Bryan Clair (bryan@slu.edu)
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
 import sys
 import pygame, pygame.time
 from countdown import CountdownTimer
+from tracking import MouseTrack
 
 pygame.init()
 print 'Pygame version',pygame.version.ver
@@ -27,13 +47,16 @@ pygame.event.set_grab(True)
 pyclock = pygame.time.Clock()
 
 countdown = CountdownTimer()
+tracker = MouseTrack()
 
 while 1:
-    timepassed = pyclock.tick();
-
-    if countdown.tick(timepassed):
+    elapsed = pyclock.tick();
+    
+    if countdown.tick(elapsed):
         # exit if out of time
         sys.exit()
+
+    tracker.tick(elapsed)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -41,8 +64,6 @@ while 1:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 sys.exit()
-        elif event.type == pygame.MOUSEMOTION:
-            print event.rel
 
     screen.fill(black)
     countdown.draw(screen)
