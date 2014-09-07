@@ -48,6 +48,10 @@ class Move:
     def length(self):
         return math.sqrt(self.x*self.x+self.y*self.y)
 
+    def angle(self,other):
+        dot = self.x*other.x + self.y*other.y
+        return dot/(self.length()*other.length())
+
     def __str__(self):
         ststr =  str(self.stilltime) + ' msec still, then ' 
         vstr = '('+str(self.x)+','+str(self.y)+')'
@@ -91,3 +95,25 @@ class MouseTrack:
                 # moved more
                 self.stilltime = 0
                 self.current += rel
+
+class Recognizer:
+    def __init__(self,target):
+        self.target = target
+
+    def fit(self,path):
+        return 0
+
+def polarize(moves):
+    """Take a list of Moves and return two lists, the first of distances,
+    the second of angles."""
+    dists = []
+    for m in moves:
+        dists.append(m.length())
+    angles = []
+    for i in range(len(moves)-1):
+        angles.append(moves[i].angle(moves[i+1]))
+    
+    return (dists,angles)
+
+def analyze(moves):
+    print polarize(moves[-5:])
