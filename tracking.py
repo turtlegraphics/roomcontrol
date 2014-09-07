@@ -97,11 +97,37 @@ class MouseTrack:
                 self.current += rel
 
 class Recognizer:
-    def __init__(self,target):
-        self.target = target
+    def __init__(self,name,target):
+        self.dists,self.angles = target
+        self.name = name
+        assert(len(self.name) == len(self.dists)+1)
+
+        print self.name,' created with ', len(self.dists), 'dists and', len(self.angles), 'angles.'
 
     def fit(self,path):
-        return 0
+        d,a = path
+        assert(len(d)==len(self.dists) and len(a)==len(self.angles))
+        ssd = 0
+        for i in range(len(d)):
+            ssd += (d[i]-self.dists[i])**2
+        ssa = 0
+        for i in range(len(a)):
+            ssa += (a[i]-self.angles[i])**2
+
+        fit = math.log(ssd)+2*math.log(ssa)
+        return fit < 10
+
+    def __len__(self):
+        """Return the number of moves (before polarization) needed to
+        match this target, which is one less than the number of letters
+        in the word."""
+        return len(self.dists)
+
+merlin = Recognizer('Merlin',([8093.606427298031, 2771.4871459200385, 7608.589948209852, 3496.6878613911194, 9112.136631987034], [0.06259612066161092, -0.3820833812868658, -0.9095979177385292, 0.8472026210790714]))
+
+houdini = Recognizer('Houdini',([6630.671836247063, 4979.341422316811, 4653.158067377467, 5948.995629515961, 7189.5479691007, 8080.3948542134995], [-0.9493428417617078, -0.8602213269097301, -0.9136929390456537, -0.9359798057071793, -0.9998822190220981]))
+
+people = [merlin,houdini]
 
 def polarize(moves):
     """Take a list of Moves and return two lists, the first of distances,
@@ -116,4 +142,13 @@ def polarize(moves):
     return (dists,angles)
 
 def analyze(moves):
-    print polarize(moves[-5:])
+    for person in people:
+        if len(moves) >= len(person):
+            p = polarize(moves[-len(person):])
+            if person.fit(p):
+                print person.name
+
+def learn(moves,name):
+    """Replace analyze with this to print the moves for defining Recognizers"""
+    if len(moves) == len(name)-1:
+        print polarize(moves)
