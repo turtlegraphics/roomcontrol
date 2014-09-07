@@ -22,38 +22,72 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 """
 
 import pygame
+import math
 
-pause_threshhold = 100  # ms of no motion for the mouse to be 'stopped'
+pause_threshold = 100  # ms of no motion for the mouse to be 'stopped'
 
 class Move:
     """Represents one continuous movement of the mouse"""
-    def __init__(self, v = (0,0)):
-        self.x,self.y = v
-    def __iadd__(self,other):
-        self.x += other.x
-        self.y += other.y
+    def __init__(self):
+        self.x,self.y = (0,0)
+        self.movetime = 0   # time mouse spent making this Move
+        self.stilltime = 0  # time mouse was still before this Move
+
+    def __iadd__(self,v):
+        (x,y) = v
+        self.x += x
+        self.y += y
         return self
+
+    def set_movetime(self,t):
+        self.movetime = t
+
+    def set_stilltime(self,t):
+        self.stilltime = t
+
+    def length(self):
+        return math.sqrt(self.x*self.x+self.y*self.y)
+
     def __str__(self):
-        return '('+str(self.x)+','+str(self.y)+')'
+        ststr =  str(self.stilltime) + ' msec still, then ' 
+        vstr = '('+str(self.x)+','+str(self.y)+')'
+        mstr = ' in ' + str(self.movetime) + ' msec.' 
+        return ststr + vstr + mstr
 
 class MouseTrack:
     """Process mouse motion into discrete vectors separated by pauses"""
     def __init__(self):
         self.still = True
         self.stilltime = 0
-        self.vector = Move()
+        self.movetime = 0
+        self.path = []
 
     def tick(self,elapsed):
         """Call periodically."""
         rel = pygame.mouse.get_rel()
-        if rel == (0,0):
-            self.stilltime += elapsed
-            if not self.still and self.stilltime > pause_threshhold:
-                print 'moved by:',self.vector
-                self.still = True
-                self.vector = Move()
-        else:
-            self.vector += Move(rel)
-            # self.vector = tuple(map(sum,zip(self.vector,rel))) # addition hack
-            self.still = False
-            self.stilltime = 0
+        if self.still:
+            if rel == (0,0):
+                # haven't moved
+                self.stilltime += elapsed
+            else:
+                # no longer still
+                self.still = False
+                self.current = Move()
+                self.current.set_stilltime(self.stilltime)
+                self.movetime = 0
+
+        if not self.still:
+            self.movetime += elapsed
+            if rel == (0,0):
+                # didn't move this tick
+                self.stilltime += elapsed
+                if self.stilltime > pause_threshold:
+                    self.still = True
+                    self.current.set_movetime(self.movetime - self.stilltime)
+                    print 'moved by:',self.current
+                    self.path.append(self.current)
+                    analyze(self.path)
+            else:
+                # moved more
+                self.stilltime = 0
+                self.current += rel
