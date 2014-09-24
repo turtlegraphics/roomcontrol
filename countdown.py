@@ -26,11 +26,12 @@ import pygame.font
 import pygame.color
 class CountdownTimer:
     """Create a countdown timer on screen"""
-    def __init__(self):
+    def __init__(self,time):
+        """Set up a timer with time seconds available."""
+        self.timeleft = time
+
         pygame.font.init()
         self.font = pygame.font.Font(None, 64)  # 64 point
-
-        self.timeleft = 1000
         self.render()
 
     def render(self):
@@ -38,9 +39,11 @@ class CountdownTimer:
         self.image = self.font.render(str(self.timeleft),True,pygame.Color('white'))
 
     def tick(self,timepassed):
-        """Decrease current time by timepassed (ms) and rebuild image"""
+        """Decrease current time by timepassed (ms) and rebuild image.
+           Return True if no time is left."""
         self.timeleft -= float(timepassed)/1000.0
         self.render()
+        return self.timeleft < 0
 
     def draw(self,surf):
         surf.blit(self.image,(0,0))
