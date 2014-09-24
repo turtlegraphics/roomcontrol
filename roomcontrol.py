@@ -43,20 +43,25 @@ screen = pygame.display.set_mode(size)
 pygame.mouse.set_visible(False)
 pygame.event.set_grab(True)
 
-# Create a pygame Clock to track elapsed time
-pyclock = pygame.time.Clock()
-
-countdown = CountdownTimer()
+# Create mouse tracking AI stuff
 tracker = MouseTrack()
 
+# Create a pygame Clock to track elapsed time
+pyclock = pygame.time.Clock()
+countdown = CountdownTimer(6000)
+
+# main loop
+started = False
 while 1:
     elapsed = pyclock.tick();
-    
-    if countdown.tick(elapsed):
-        # exit if out of time
-        sys.exit()
 
-    tracker.tick(elapsed)
+    if started:
+        # Advance the countdown clock
+        if countdown.tick(elapsed):
+            # exit if out of time
+            sys.exit()
+        # Track mouse movement
+        tracker.tick(elapsed)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -64,6 +69,8 @@ while 1:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 sys.exit()
+            if event.key == pygame.K_RETURN:
+                started = True
 
     screen.fill(black)
     countdown.draw(screen)
