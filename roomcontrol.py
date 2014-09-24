@@ -69,8 +69,8 @@ while 1:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 sys.exit()
-            if event.key == pygame.K_RETURN:
-                started = True
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            started = True
 
     screen.fill(black)
     countdown.draw(screen)
