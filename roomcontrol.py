@@ -61,9 +61,8 @@ while 1:
 
     if started:
         # Advance the countdown clock
-        if countdown.tick(elapsed):
-            # exit if out of time
-            sys.exit()
+        countdown.tick(elapsed)
+
         # Track mouse movement, if no sound is playing
         if not sound.player.isbusy():
             detected = tracker.tick(elapsed)
