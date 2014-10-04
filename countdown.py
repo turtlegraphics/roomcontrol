@@ -29,21 +29,39 @@ class CountdownTimer:
     def __init__(self,time):
         """Set up a timer with time seconds available."""
         self.timeleft = time
+        self.oldtime = None
 
         pygame.font.init()
-        self.font = pygame.font.Font(None, 64)  # 64 point
-        self.render()
+        self.font = pygame.font.Font(None, 256)  # 256 point
+        self.render(time)
+        
+        # set 1/2 image width only once, at start, so it doesn't jitter
+        (self.mx,self.my) = self.image.get_rect().center
 
-    def render(self):
-        """Build the text image of the current time"""
-        self.image = self.font.render(str(self.timeleft),True,pygame.Color('white'))
+    def render(self,time):
+        """Build the text image of the given time."""
+        color = pygame.Color('red') if time == 0 else pygame.Color('white')
+        minutes = int(time/60)
+        seconds = time - 60*minutes
+        timestr = '%02d:%04.1f' % (minutes,seconds)
+        self.image = self.font.render(timestr,True,color)
+
+    def outoftime(self):
+        return self.timeleft < 0
 
     def tick(self,timepassed):
         """Decrease current time by timepassed (ms) and rebuild image.
            Return True if no time is left."""
         self.timeleft -= float(timepassed)/1000.0
-        self.render()
-        return self.timeleft < 0
+
+        time = round(self.timeleft,1)
+        if time < 0:
+            time = 0
+
+        if time != self.oldtime:
+            self.render(time)
+            self.oldtime = time
 
     def draw(self,surf):
-        surf.blit(self.image,(0,0))
+        (cx,cy) = surf.get_rect().center
+        surf.blit(self.image,(cx-self.mx,cy-self.my))
