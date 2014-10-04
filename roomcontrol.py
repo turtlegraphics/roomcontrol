@@ -64,8 +64,12 @@ while 1:
         if countdown.tick(elapsed):
             # exit if out of time
             sys.exit()
-        # Track mouse movement
-        tracker.tick(elapsed)
+        # Track mouse movement, if no sound is playing
+        if not sound.player.isbusy():
+            detected = tracker.tick(elapsed)
+            if detected:
+                print 'Going to play: '+detected
+                sound.player.play('success.ogg')
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

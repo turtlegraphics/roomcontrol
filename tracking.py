@@ -110,7 +110,7 @@ class MouseTrack:
                                 #print self.path[-(len(learning)-1):]
                                 print polarize(self.path[-(len(learning)-1):])
                         else:
-                            analyze(self.path)
+                            return analyze(self.path)
             else:
                 # moved more
                 self.stilltime = 0
@@ -201,9 +201,12 @@ def polarize(moves):
     return (dists,angles)
 
 def analyze(moves):
+    detected = None
     for person in people:
         if len(moves) >= len(person):
             p = polarize(moves[-len(person):])
             if person.fit(p):
                 print '\nDETECTED: '+person.name.upper(),
+                detected = person.name
     print
+    return detected
