@@ -52,7 +52,7 @@ tracker = MouseTrack()
 
 # Create a pygame Clock to track elapsed time
 pyclock = pygame.time.Clock()
-countdown = CountdownTimer(6000)
+countdown = CountdownTimer(3600)
 
 # main loop
 started = False
