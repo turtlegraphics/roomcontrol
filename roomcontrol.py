@@ -30,9 +30,13 @@ import sys
 import pygame, pygame.time
 from countdown import CountdownTimer
 from tracking import MouseTrack
+import sound
 
 pygame.init()
 print 'Pygame version',pygame.version.ver
+
+# Init sound
+sound.player.set_path(sys.argv[1])
 
 size = width, height = 800, 800
 speed = [2, 2]
