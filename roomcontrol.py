@@ -28,21 +28,52 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 import sys
 import pygame, pygame.time
+from pygame.locals import *
+
+def toggle_fullscreen():
+    screen = pygame.display.get_surface()
+    tmp = screen.convert()
+    w,h = screen.get_width(),screen.get_height()
+    flags = screen.get_flags()
+
+    pygame.display.quit()
+    pygame.display.init()
+
+    if flags & FULLSCREEN:
+        screen = pygame.display.set_mode((w,h))
+    else:
+        screen = pygame.display.set_mode((w,h),FULLSCREEN)
+    screen.blit(tmp,(0,0))
+ 
+# Command handlers
+def do_command(key):
+    """
+    Commands are ESC-key, where key is one of:
+    q: Quit
+    p: Pause/resume
+    f: Toggle fullscreen
+    """
+    if key == 'q':
+        sys.exit()
+    if key == 'p':
+        global running
+        running = not running
+    if key == 'f':
+        toggle_fullscreen()
+
+print 'Pygame version',pygame.version.ver
+print do_command.__doc__
+
+# Bring in game modules
 from countdown import CountdownTimer
 from tracking import MouseTrack
 import sound
 
+# Initialize
 pygame.init()
-print 'Pygame version',pygame.version.ver
 
-# Init sound
 sound.player.set_path(sys.argv[1])
-
-size = width, height = 800, 800
-speed = [2, 2]
-black = 0, 0, 0
-
-screen = pygame.display.set_mode(size)
+pygame.display.set_mode((800,800))
 
 pygame.mouse.set_visible(False)
 pygame.event.set_grab(True)
@@ -54,12 +85,14 @@ tracker = MouseTrack()
 pyclock = pygame.time.Clock()
 countdown = CountdownTimer(3600)
 
+running = False
+escape = False
+
 # main loop
-started = False
 while 1:
     elapsed = pyclock.tick();
 
-    if started:
+    if running:
         # Advance the countdown clock
         countdown.tick(elapsed)
 
@@ -75,10 +108,15 @@ while 1:
             sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                sys.exit()
+                escape = True
+            elif escape:
+                escape = False
+                do_command(chr(event.key))
         if event.type == pygame.MOUSEBUTTONDOWN:
-            started = True
+            running = True
 
-    screen.fill(black)
+    screen = pygame.display.get_surface()
+    screen.fill((0,0,0))
     countdown.draw(screen)
     pygame.display.flip()
+
