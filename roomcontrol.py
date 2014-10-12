@@ -30,6 +30,12 @@ import sys
 import pygame, pygame.time
 from pygame.locals import *
 
+# Bring in game modules
+import countdown
+import gamecontrol
+import tracking
+import sound
+
 def toggle_fullscreen():
     screen = pygame.display.get_surface()
     tmp = screen.convert()
@@ -75,17 +81,17 @@ def do_command(key):
             print 'Training for',training
         tracker.train(training)
 
+#
+#
+#  Program starts here.
+#
+#
+
 print 'Pygame version',pygame.version.ver
 print do_command.__doc__
 if len(sys.argv) not in [2,3]:
     print 'Usage: roomcontrol audiopath [trainWORD]'
     sys.exit(1)
-
-# Bring in game modules
-import countdown
-import gamecontrol
-import tracking
-import sound
 
 # Initialize
 pygame.init()
@@ -101,13 +107,16 @@ game = gamecontrol.Game()
 
 # Create mouse tracking
 training = None
-tracker = tracking.MouseTrack(gamecontrol.people)
+tracker = tracking.MouseTrack(game.people)
 
 # Create a pygame Clock to track elapsed time
 pyclock = pygame.time.Clock()
 countdown = countdown.CountdownTimer(3600)
 
+# Flag true if countdown is running
 running = False
+
+# How much time left on last ESC key pressed (ms)
 escape = 0
 
 # main loop

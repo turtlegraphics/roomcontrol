@@ -155,8 +155,6 @@ class Recognizer:
         self.threshold = threshold
         assert(len(self.name) == len(self.dists)+1)
 
-        print self.name,' created with ', len(self.dists), 'dists and', len(self.angles), 'angles.'
-
     def displayfit(self,fit):
         colorvalues = [bcolors.GREEN, bcolors.BLUE, bcolors.RED, bcolors.BLACK]
         debugstr = '%8s %2.1f' % (self.name,fit)
