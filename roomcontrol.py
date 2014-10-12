@@ -65,8 +65,9 @@ print 'Pygame version',pygame.version.ver
 print do_command.__doc__
 
 # Bring in game modules
-from countdown import CountdownTimer
-from tracking import MouseTrack
+import countdown
+import gamecontrol
+import tracking
 import sound
 
 # Initialize
@@ -78,12 +79,15 @@ pygame.display.set_mode((800,800))
 pygame.mouse.set_visible(False)
 pygame.event.set_grab(True)
 
-# Create mouse tracking AI stuff
-tracker = MouseTrack()
+# Create spirit game control
+game = gamecontrol.Game()
+
+# Create mouse tracking
+tracker = tracking.MouseTrack(gamecontrol.people)
 
 # Create a pygame Clock to track elapsed time
 pyclock = pygame.time.Clock()
-countdown = CountdownTimer(3600)
+countdown = countdown.CountdownTimer(3600)
 
 running = False
 escape = False
@@ -98,10 +102,9 @@ while 1:
 
         # Track mouse movement, if no sound is playing
         if not sound.player.isbusy():
-            detected = tracker.tick(elapsed)
-            if detected:
-                print 'Going to play: '+detected
-                sound.player.play('success.ogg')
+            spirit = tracker.tick(elapsed)
+            if spirit:
+                game.detected(spirit)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -114,6 +117,8 @@ while 1:
                 do_command(chr(event.key))
         if event.type == pygame.MOUSEBUTTONDOWN:
             running = True
+        if event.type == pygame.USEREVENT:
+            game.winEvent()
 
     screen = pygame.display.get_surface()
     screen.fill((0,0,0))
