@@ -31,29 +31,29 @@ class Game:
         self.got5 = False
         self.playedHoudini = False
 
-        self.people = []
-        self.datadir = datadir
-        self.readpeople(os.path.join(self.datadir,'tracking.txt'))
+        self.recognizers = []
+        self.sounds = {}
 
-    def playtrack(self,track):
+        self.datadir = datadir
+        self.readdata(os.path.join(self.datadir,'tracking.txt'))
+        self.sounds['Houdini'] = (pygame.mixer.Sound(os.path.join(self.datadir,'audio','Houdini.ogg')),None)
+
+    def playtrack(self,who,track):
         """Play an audio track from the directory datadir/audio"""
-        print 'Playing',track
-        filename = os.path.join(self.datadir,'audio',track)
-        pygame.mixer.Sound(filename).play()
+        print 'Playing',who,' track ',track+1
+        self.sounds[who][track].play()
 
     def detected(self,who):
         """Called when a mouse sequence is detected.
            who is the Recognizer for that sequence."""
-        print 'Going to play: '+who.name
         if who.name not in self.played:
             self.played.append(who.name)
-            track = who.name+'.ogg'
+            self.playtrack(who.name,0)
         else:
-            track = who.name + '2.ogg'
-        self.playtrack(track)
+            self.playtrack(who.name,1)
 
         if not self.got5 and len(self.played) == 5:
-            print 'Got all five.  Wait a sec...'
+            print 'Got all five.'
             self.got5 = True
             # trigger an event 90 seconds later
             pygame.time.set_timer(pygame.USEREVENT,90000)
@@ -62,9 +62,9 @@ class Game:
         """Called when the pygame.USEREVENT is triggered."""
         if not self.playedHoudini:
             self.playedHoudini = True
-            self.playtrack('Houdini.ogg')
+            self.playtrack('Houdini',0)
             
-    def readpeople(self,file):
+    def readdata(self,file):
         """
         File format:
            Line 1: Integer number of records in file
@@ -79,10 +79,15 @@ class Game:
         print numpeople,'people'
         for p in range(numpeople):
             name = f.readline().strip()
+
             thresh = float(f.readline())
             data = eval(f.readline())
             print 'Creating recognizer for',name
-            self.people.append(Recognizer(name,thresh,data))
+            self.recognizers.append(Recognizer(name,thresh,data))
+
+            self.sounds[name] = (pygame.mixer.Sound(os.path.join(self.datadir,'audio',name+'.ogg')),
+                                 pygame.mixer.Sound(os.path.join(self.datadir,'audio',name+'2.ogg')))
+
         f.close()
 
 """

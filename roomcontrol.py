@@ -116,7 +116,7 @@ game = gamecontrol.Game(datadir)
 
 # Create mouse tracking
 training = None
-tracker = tracking.MouseTrack(game.people)
+tracker = tracking.MouseTrack(game.recognizers)
 
 # Create a pygame Clock to track elapsed time
 pyclock = pygame.time.Clock()
