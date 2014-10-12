@@ -72,7 +72,8 @@ def do_command(key):
         toggle_fullscreen()
     elif key == 'a':
         print 'Audio check playing...'
-        pygame.mixer.Sound('soundcheck.ogg').play()
+        global testsound
+        testsound.play()
     elif key == 't':
         global training
         if training:
@@ -97,7 +98,9 @@ if len(sys.argv) not in [2,3]:
 
 # Initialize
 pygame.init()
+
 pygame.mixer.init()
+testsound=pygame.mixer.Sound('soundcheck.ogg')
 
 pygame.display.set_mode((800,800))
 
