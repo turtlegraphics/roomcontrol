@@ -63,6 +63,9 @@ def do_command(key):
 
 print 'Pygame version',pygame.version.ver
 print do_command.__doc__
+if len(sys.argv) not in [2,3]:
+    print 'Usage: roomcontrol audiopath [trainWORD]'
+    sys.exit(1)
 
 # Bring in game modules
 import countdown
@@ -83,7 +86,10 @@ pygame.event.set_grab(True)
 game = gamecontrol.Game()
 
 # Create mouse tracking
-tracker = tracking.MouseTrack(gamecontrol.people)
+training = None
+if len(sys.argv) == 3:
+    training = sys.argv[2]
+tracker = tracking.MouseTrack(gamecontrol.people,training)
 
 # Create a pygame Clock to track elapsed time
 pyclock = pygame.time.Clock()

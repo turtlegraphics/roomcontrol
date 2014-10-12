@@ -24,9 +24,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 import pygame
 import math
 
-# Define to a non-empty string if you want output for creating Recognizers
-learning = ''
-
 # Used for color terminal output
 class bcolors:
     BLACK = '\033[90m'
@@ -84,13 +81,16 @@ def polarize(moves):
     return (dists,angles)
 
 class MouseTrack:
-    """Process mouse motion into discrete vectors separated by pauses"""
-    def __init__(self,people):
+    """Process mouse motion into discrete vectors separated by pauses.
+    people is a list of Recognizers.  If learning is a string, print
+    mouse track data when that many letters have appeared."""
+    def __init__(self,people,learning = None):
         self.still = True
         self.stilltime = 0
         self.movetime = 0
         self.path = []
         self.people = people
+        self.learning = learning
 
     def analyze(self):
         """Check current path for match against defined people."""
@@ -132,10 +132,10 @@ class MouseTrack:
                         # only pay attention to real moves, not twitches
                         # print 'moved by:',self.current
                         self.path.append(self.current)
-                        if learning:
-                            if len(self.path) >= len(learning)-1:
-                                #print self.path[-(len(learning)-1):]
-                                print polarize(self.path[-(len(learning)-1):])
+                        if self.learning:
+                            if len(self.path) >= len(self.learning)-1:
+                                print polarize(self.path[-(len(self.learning)-1):])
+                            return None
                         else:
                             return self.analyze()
             else:
