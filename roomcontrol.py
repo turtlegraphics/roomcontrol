@@ -50,6 +50,9 @@ def toggle_fullscreen():
     else:
         screen = pygame.display.set_mode((w,h),FULLSCREEN)
     screen.blit(tmp,(0,0))
+
+    pygame.mouse.set_visible(False)
+    pygame.event.set_grab(True)
  
 # Command handlers
 def do_command(key):
