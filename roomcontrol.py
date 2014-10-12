@@ -52,14 +52,18 @@ def do_command(key):
     q: Quit
     p: Pause/resume
     f: Toggle fullscreen
+    a: Audio test
     """
     if key == 'q':
         sys.exit()
-    if key == 'p':
+    elif key == 'p':
         global running
         running = not running
-    if key == 'f':
+    elif key == 'f':
         toggle_fullscreen()
+    elif key == 'a':
+        print 'Audio check playing...'
+        sound.player.play('soundcheck.ogg')
 
 print 'Pygame version',pygame.version.ver
 print do_command.__doc__
