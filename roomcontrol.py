@@ -53,6 +53,7 @@ def do_command(key):
     p: Pause/resume
     f: Toggle fullscreen
     a: Audio test
+    (Also note you only have 1 second after ESC to hit the key)
     """
     if key == 'q':
         sys.exit()
@@ -107,11 +108,14 @@ pyclock = pygame.time.Clock()
 countdown = countdown.CountdownTimer(3600)
 
 running = False
-escape = False
+escape = 0
 
 # main loop
 while 1:
     elapsed = pyclock.tick();
+
+    # Timeout escape key press
+    escape = max(0,escape - elapsed)
 
     if running:
         # Advance the countdown clock
@@ -128,9 +132,9 @@ while 1:
             sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                escape = not escape
-            elif escape:
-                escape = False
+                escape = 1000
+            elif escape > 0:
+                escape = 0
                 do_command(chr(event.key))
         if event.type == pygame.MOUSEBUTTONDOWN:
             running = True
