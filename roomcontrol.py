@@ -1,4 +1,4 @@
-"""
+ """
 roomcontrol
 
 Program to operate a locked room puzzle game.
@@ -96,14 +96,16 @@ if len(sys.argv) not in [2,3]:
 # Initialize
 pygame.init()
 
-sound.player.set_path(sys.argv[1])
 pygame.display.set_mode((800,800))
 
 pygame.mouse.set_visible(False)
 pygame.event.set_grab(True)
 
 # Create spirit game control
-game = gamecontrol.Game()
+game = gamecontrol.Game(sys.argv[1]+'/tracking.txt')
+
+# Set up audio
+sound.player.set_path(sys.argv[1])
 
 # Create mouse tracking
 training = None
