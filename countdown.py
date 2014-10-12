@@ -40,7 +40,10 @@ class CountdownTimer:
 
     def render(self,time):
         """Build the text image of the given time."""
-        color = pygame.Color('red') if time == 0 else pygame.Color('white')
+        if time == 0:
+            color = pygame.Color('red')
+        else:
+            color = pygame.Color('white')
         minutes = int(time/60)
         seconds = time - 60*minutes
         timestr = '%02d:%04.1f' % (minutes,seconds)
