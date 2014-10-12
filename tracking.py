@@ -71,13 +71,40 @@ class Move:
         mstr = ' in ' + str(self.movetime) + ' msec.' 
         return ststr + vstr + mstr
 
+def polarize(moves):
+    """Take a list of Moves and return two lists, the first of distances,
+    the second of angles."""
+    dists = []
+    for m in moves:
+        dists.append(m.length())
+    angles = []
+    for i in range(len(moves)-1):
+        angles.append(moves[i].angle(moves[i+1]))
+    
+    return (dists,angles)
+
 class MouseTrack:
     """Process mouse motion into discrete vectors separated by pauses"""
-    def __init__(self):
+    def __init__(self,people):
         self.still = True
         self.stilltime = 0
         self.movetime = 0
         self.path = []
+        self.people = people
+
+    def analyze(self):
+        """Check current path for match against defined people."""
+        detected = None
+        for person in self.people:
+            if len(self.path) >= len(person):
+                p = polarize(self.path[-len(person):])
+                if person.fit(p):
+                    detected = person
+        print
+        if detected:
+            print '\nDETECTED: ' + detected.name.upper()
+            self.path = []
+        return detected
 
     def tick(self,elapsed):
         """Call periodically."""
@@ -110,7 +137,7 @@ class MouseTrack:
                                 #print self.path[-(len(learning)-1):]
                                 print polarize(self.path[-(len(learning)-1):])
                         else:
-                            return analyze(self.path)
+                            return self.analyze()
             else:
                 # moved more
                 self.stilltime = 0
@@ -150,63 +177,3 @@ class Recognizer:
         in the word."""
         return len(self.dists)
 
-people = []
-"""
-people.append(
-    Recognizer('Merlin',12.0,
-               ([8093.606427298031, 2771.4871459200385, 7608.589948209852, 3496.6878613911194, 9112.136631987034], [0.06259612066161092, -0.3820833812868658, -0.9095979177385292, 0.8472026210790714]))
-    )
-"""
-
-people.append(
-    Recognizer('Houdini',5.0,
-               ([6630.671836247063, 4979.341422316811, 4653.158067377467, 5948.995629515961, 7189.5479691007, 8080.3948542134995], [-0.9493428417617078, -0.8602213269097301, -0.9136929390456537, -0.9359798057071793, -0.9998822190220981]))
-    )
-
-people.append(
-    Recognizer('Midas', 4.0,
-               ([3822.2977382720987, 4999.191234589851, 3725.0229529494177, 5331.870403526327], [0.9584049182859741, 0.9807076508765032, -0.9333008921042961]))
-    )
-
-people.append(
-    Recognizer('Galileo',10.0,
-               ([7255.6533820187415, 11233.458950830773, 3318.7780883933774, 3215.880750276664, 7795.025400856626, 4747.526724516672], [-0.9918365796488631, -0.9872788585054973, -0.9999813948537128, -0.9997602854163206, 0.6353019949677967]))
-    )
-
-people.append(
-    Recognizer('Chanel',10.0,
-               ([5290.053402376955, 7738.783496131676, 2557.6053252994293, 5581.160452809075, 7422.016504966828], [-0.9995827172115008, 0.2853657977028101, -0.7546515231404586, 0.7307258820994635]))
-    )
-
-people.append(
-    Recognizer('Child',3.0,
-               ([4883.018738444488, 882.9099614343469, 2758.840517318825, 8449.98769229873], [0.972970842178754, 0.9999816181104513, -0.9875822612813664]))
-    )
-
-people.append(
-    Recognizer('Mozart',5.0,
-               ([8009.136907307803, 12226.723395906198, 12435.491988658912, 3766.108468963686, 2556.6425248751534], [-0.9854573672613719, -0.997492314559631, -0.9998707184892288, 0.9692752551648487]))
-    )
-
-def polarize(moves):
-    """Take a list of Moves and return two lists, the first of distances,
-    the second of angles."""
-    dists = []
-    for m in moves:
-        dists.append(m.length())
-    angles = []
-    for i in range(len(moves)-1):
-        angles.append(moves[i].angle(moves[i+1]))
-    
-    return (dists,angles)
-
-def analyze(moves):
-    detected = None
-    for person in people:
-        if len(moves) >= len(person):
-            p = polarize(moves[-len(person):])
-            if person.fit(p):
-                print '\nDETECTED: '+person.name.upper(),
-                detected = person.name
-    print
-    return detected
