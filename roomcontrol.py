@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-import sys
+import sys,os
 import pygame, pygame.time
 from pygame.locals import *
 
@@ -34,7 +34,6 @@ from pygame.locals import *
 import countdown
 import gamecontrol
 import tracking
-import sound
 
 def toggle_fullscreen():
     screen = pygame.display.get_surface()
@@ -73,7 +72,7 @@ def do_command(key):
         toggle_fullscreen()
     elif key == 'a':
         print 'Audio check playing...'
-        sound.player.play('soundcheck.ogg')
+        pygame.mixer.Sound('soundcheck.ogg').play()
     elif key == 't':
         global training
         if training:
@@ -98,17 +97,19 @@ if len(sys.argv) not in [2,3]:
 
 # Initialize
 pygame.init()
+pygame.mixer.init()
 
 pygame.display.set_mode((800,800))
 
 pygame.mouse.set_visible(False)
 pygame.event.set_grab(True)
 
-# Create spirit game control
-game = gamecontrol.Game(sys.argv[1]+'/tracking.txt')
+datadir = sys.argv[1]
+if not os.path.isdir(datadir):
+    raise ValueError('Not a directory: '+datadir)
 
-# Set up audio
-sound.player.set_path(sys.argv[1])
+# Create spirit game control
+game = gamecontrol.Game(datadir)
 
 # Create mouse tracking
 training = None
@@ -136,7 +137,7 @@ while 1:
         countdown.tick(elapsed)
 
         # Track mouse movement, if no sound is playing
-        if not sound.player.isbusy():
+        if not pygame.mixer.get_busy():
             spirit = tracker.tick(elapsed)
             if spirit:
                 game.detected(spirit)

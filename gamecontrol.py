@@ -19,19 +19,27 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
+import os
 import pygame
-import sound
+
 from tracking import Recognizer
 
 class Game:
-    def __init__(self,datafile):
+    def __init__(self,datadir):
         """Reset game state and load data from datafile."""
         self.played = []
         self.got5 = False
         self.playedHoudini = False
 
         self.people = []
-        self.readpeople(datafile)
+        self.datadir = datadir
+        self.readpeople(os.path.join(self.datadir,'tracking.txt'))
+
+    def playtrack(self,track):
+        """Play an audio track from the directory datadir/audio"""
+        print 'Playing',track
+        filename = os.path.join(self.datadir,'audio',track)
+        pygame.mixer.Sound(filename).play()
 
     def detected(self,who):
         """Called when a mouse sequence is detected.
@@ -39,12 +47,11 @@ class Game:
         print 'Going to play: '+who.name
         if who.name not in self.played:
             self.played.append(who.name)
-            print 'Playing part 1.'
-            sound.player.play(who.name + '.ogg')
+            track = who.name+'.ogg'
         else:
-            print 'Playing part 2.'
-            sound.player.play(who.name + '2.ogg')
-        
+            track = who.name + '2.ogg'
+        self.playtrack(track)
+
         if not self.got5 and len(self.played) == 5:
             print 'Got all five.  Wait a sec...'
             self.got5 = True
@@ -55,7 +62,7 @@ class Game:
         """Called when the pygame.USEREVENT is triggered."""
         if not self.playedHoudini:
             self.playedHoudini = True
-            sound.player.play('Houdini.ogg')
+            self.playtrack('Houdini.ogg')
             
     def readpeople(self,file):
         """
