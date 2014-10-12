@@ -82,15 +82,20 @@ def polarize(moves):
 
 class MouseTrack:
     """Process mouse motion into discrete vectors separated by pauses.
-    people is a list of Recognizers.  If learning is a string, print
-    mouse track data when that many letters have appeared."""
-    def __init__(self,people,learning = None):
+    people is a list of Recognizers."""
+    def __init__(self,people):
         self.still = True
         self.stilltime = 0
         self.movetime = 0
         self.path = []
         self.people = people
-        self.learning = learning
+        self.learning = None
+
+    def train(self, who):
+        """Pass a string to supress recognition, but produce path output
+        for a path with the length of the string."""
+        self.path = []
+        self.learning = who
 
     def analyze(self):
         """Check current path for match against defined people."""

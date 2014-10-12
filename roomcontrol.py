@@ -64,6 +64,15 @@ def do_command(key):
     elif key == 'a':
         print 'Audio check playing...'
         sound.player.play('soundcheck.ogg')
+    elif key == 't':
+        global training
+        if training:
+            training = None
+            print 'Training off.'
+        else:
+            training = sys.argv[2]
+            print 'Training for',training
+        tracker.train(training)
 
 print 'Pygame version',pygame.version.ver
 print do_command.__doc__
@@ -91,9 +100,7 @@ game = gamecontrol.Game()
 
 # Create mouse tracking
 training = None
-if len(sys.argv) == 3:
-    training = sys.argv[2]
-tracker = tracking.MouseTrack(gamecontrol.people,training)
+tracker = tracking.MouseTrack(gamecontrol.people)
 
 # Create a pygame Clock to track elapsed time
 pyclock = pygame.time.Clock()
@@ -121,7 +128,7 @@ while 1:
             sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                escape = True
+                escape = not escape
             elif escape:
                 escape = False
                 do_command(chr(event.key))
