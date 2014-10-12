@@ -1,4 +1,4 @@
- """
+"""
 roomcontrol
 
 Program to operate a locked room puzzle game.
