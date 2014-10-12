@@ -1,4 +1,4 @@
- """
+"""
 gamecontrol
 
 Handles the spirit data, decides how to respond to detected mouse motions.
