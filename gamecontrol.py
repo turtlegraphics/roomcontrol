@@ -36,7 +36,7 @@ class Game:
 
         self.datadir = datadir
         self.readdata(os.path.join(self.datadir,'tracking.txt'))
-        self.sounds['Houdini'] = (pygame.mixer.Sound(os.path.join(self.datadir,'audio','Houdini.ogg')),None)
+        self.loadsound('Houdini')
 
     def playtrack(self,who,track):
         """Play an audio track from the directory datadir/audio"""
@@ -63,7 +63,16 @@ class Game:
         if not self.playedHoudini:
             self.playedHoudini = True
             self.playtrack('Houdini',0)
-            
+
+    def loadsound(self,name):
+        """Load a pair of sound files, name.ogg and name2.ogg"""
+        path1 = os.path.join(self.datadir,'audio',name+'.ogg')
+        path2 = os.path.join(self.datadir,'audio',name+'2.ogg')
+        s = (pygame.mixer.Sound(path1),pygame.mixer.Sound(path2))
+        print 'Loaded',path1,',',s[0].get_length(),'seconds'
+        print 'Loaded',path2,',',s[1].get_length(),'seconds'
+        self.sounds[name] = s
+
     def readdata(self,file):
         """
         File format:
@@ -79,14 +88,12 @@ class Game:
         print numpeople,'people'
         for p in range(numpeople):
             name = f.readline().strip()
+            self.loadsound(name)
 
             thresh = float(f.readline())
             data = eval(f.readline())
             print 'Creating recognizer for',name
             self.recognizers.append(Recognizer(name,thresh,data))
-
-            self.sounds[name] = (pygame.mixer.Sound(os.path.join(self.datadir,'audio',name+'.ogg')),
-                                 pygame.mixer.Sound(os.path.join(self.datadir,'audio',name+'2.ogg')))
 
         f.close()
 
