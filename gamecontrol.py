@@ -58,7 +58,7 @@ class Game:
             print 'Got all five.'
             self.got5 = True
             # trigger an event 90 seconds later
-            pygame.time.set_timer(pygame.USEREVENT,90000)
+            pygame.time.set_timer(pygame.USEREVENT,60000)
 
     def winEvent(self):
         """Called when the pygame.USEREVENT is triggered."""
