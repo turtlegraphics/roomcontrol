@@ -24,6 +24,8 @@ import pygame
 
 from tracking import Recognizer
 
+SOUNDEXT = '.wav'
+
 class Game:
     def __init__(self,datadir):
         """Reset game state and load data from datafile."""
@@ -65,14 +67,12 @@ class Game:
             self.playtrack('Houdini',0)
 
     def loadsound(self,name):
-        """Load a pair of sound files, name.ogg and name2.ogg"""
-        path0 = os.path.join(self.datadir,'audio',name+'.ogg')
-        path1 = os.path.join(self.datadir,'audio',name+'2.ogg')
-        s0 = pygame.mixer.Sound(file=path0)
-        print 'Loaded',path0,',',s0.get_length(),'seconds'
-        s1 = pygame.mixer.Sound(file=path1)
-        print 'Loaded',path1,',',s1.get_length(),'seconds'
-        self.sounds[name] = (s0,s1)
+        """Load a pair of sound files, name and name2"""
+        s = (pygame.mixer.Sound(os.path.join(self.datadir,'audio',name+SOUNDEXT)),
+             pygame.mixer.Sound(os.path.join(self.datadir,'audio',name+'2'+SOUNDEXT)))
+        print 'Loaded',name,',',s[0].get_length(),'seconds'
+        print 'Loaded',name+'2',',',s[1].get_length(),'seconds'
+        self.sounds[name] = s
 
     def readdata(self,file):
         """

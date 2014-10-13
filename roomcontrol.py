@@ -100,7 +100,7 @@ if len(sys.argv) not in [2,3]:
 pygame.init()
 
 pygame.mixer.init()
-testsound=pygame.mixer.Sound('soundcheck.ogg')
+testsound=pygame.mixer.Sound('soundcheck.wav')
 
 pygame.display.set_mode((800,800))
 
