@@ -66,12 +66,13 @@ class Game:
 
     def loadsound(self,name):
         """Load a pair of sound files, name.ogg and name2.ogg"""
-        path1 = os.path.join(self.datadir,'audio',name+'.ogg')
-        path2 = os.path.join(self.datadir,'audio',name+'2.ogg')
-        s = (pygame.mixer.Sound(path1),pygame.mixer.Sound(path2))
-        print 'Loaded',path1,',',s[0].get_length(),'seconds'
-        print 'Loaded',path2,',',s[1].get_length(),'seconds'
-        self.sounds[name] = s
+        path0 = os.path.join(self.datadir,'audio',name+'.ogg')
+        path1 = os.path.join(self.datadir,'audio',name+'2.ogg')
+        s0 = pygame.mixer.Sound(file=path0)
+        print 'Loaded',path0,',',s0.get_length(),'seconds'
+        s1 = pygame.mixer.Sound(file=path1)
+        print 'Loaded',path1,',',s1.get_length(),'seconds'
+        self.sounds[name] = (s0,s1)
 
     def readdata(self,file):
         """
