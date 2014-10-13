@@ -135,7 +135,7 @@ timechanged = True
 
 # main loop
 while 1:
-    elapsed = pyclock.tick();
+    elapsed = pyclock.tick(50);
 
     # Timeout escape key press
     escape = max(0,escape - elapsed)
