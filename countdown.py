@@ -54,7 +54,7 @@ class CountdownTimer:
 
     def tick(self,timepassed):
         """Decrease current time by timepassed (ms) and rebuild image.
-           Return True if no time is left."""
+           Return True if display has changed."""
         self.timeleft -= float(timepassed)/1000.0
 
         time = round(self.timeleft,1)
@@ -64,6 +64,9 @@ class CountdownTimer:
         if time != self.oldtime:
             self.render(time)
             self.oldtime = time
+            return True
+
+        return False
 
     def draw(self,surf):
         (cx,cy) = surf.get_rect().center

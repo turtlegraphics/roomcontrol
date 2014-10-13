@@ -70,6 +70,8 @@ def do_command(key):
         running = not running
     elif key == 'f':
         toggle_fullscreen()
+        global timechanged
+        timechanged = True
     elif key == 'a':
         print 'Audio check playing...'
         global testsound
@@ -128,6 +130,9 @@ running = False
 # How much time left on last ESC key pressed (ms)
 escape = 0
 
+# Flag to tell if screen needs refresh
+timechanged = True
+
 # main loop
 while 1:
     elapsed = pyclock.tick();
@@ -137,7 +142,7 @@ while 1:
 
     if running:
         # Advance the countdown clock
-        countdown.tick(elapsed)
+        timechanged = countdown.tick(elapsed)
 
         # Track mouse movement, if no sound is playing
         if not pygame.mixer.get_busy():
@@ -159,8 +164,9 @@ while 1:
         if event.type == pygame.USEREVENT:
             game.winEvent()
 
-    screen = pygame.display.get_surface()
-    screen.fill((0,0,0))
-    countdown.draw(screen)
-    pygame.display.flip()
-
+    if timechanged:
+        screen = pygame.display.get_surface()
+        screen.fill((0,0,0))
+        countdown.draw(screen)
+        pygame.display.flip()
+        timechanged = False
