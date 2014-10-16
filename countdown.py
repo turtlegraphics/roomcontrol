@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 import pygame
 import pygame.font
 import pygame.color
+
 class CountdownTimer:
     """Create a countdown timer on screen"""
     def __init__(self,time):
@@ -32,6 +33,8 @@ class CountdownTimer:
         self.time = time
         # self.oldtime is the last rendered time string
         self.oldtime = None
+
+        self.outoftime = False
 
         pygame.font.init()
         self.font = pygame.font.Font(None, 256)  # 256 point
@@ -50,7 +53,7 @@ class CountdownTimer:
         """Build the text image of the given time.  Return True if changed."""
         timestr = str(self)
         if timestr != self.oldtime:
-            if self.time == 0:
+            if self.outoftime:
                 color = pygame.Color('red')
             else:
                 color = pygame.Color('white')
@@ -66,6 +69,10 @@ class CountdownTimer:
         self.time -= float(timepassed)/1000.0
         if self.time < 0:
             self.time = 0
+            if not self.outoftime:
+                self.outoftime = True
+                self.oldtime = None  # force re-render
+                pygame.event.post(pygame.event.Event(pygame.USEREVENT+1))
 
         return self.render()
 

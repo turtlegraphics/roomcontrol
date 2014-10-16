@@ -75,8 +75,7 @@ def do_command(key):
         timechanged = True
     elif key == 'a':
         print 'Audio check playing...'
-        global testsound
-        testsound.play()
+        pygame.mixer.Sound('soundcheck.wav').play()
     elif key == 't':
         global training
         if training:
@@ -90,8 +89,8 @@ def do_command(key):
 def log(msg):
     """Write msg to the logfile for this run."""
     global logfile
-    global countdown
-    logfile.write(str(countdown)+' '+msg+'\n')
+    global timer
+    logfile.write(str(timer)+' '+msg+'\n')
 
 #
 #
@@ -109,7 +108,6 @@ if len(sys.argv) not in [2,3]:
 pygame.init()
 
 pygame.mixer.init()
-testsound=pygame.mixer.Sound('soundcheck.wav')
 
 pygame.display.set_mode((800,800))
 
@@ -133,7 +131,7 @@ tracker = tracking.MouseTrack(game.recognizers)
 
 # Create a pygame Clock to track elapsed time
 pyclock = pygame.time.Clock()
-countdown = countdown.CountdownTimer(3600)
+timer = countdown.CountdownTimer(10)
 
 # Flag true if countdown is running
 running = False
@@ -153,7 +151,7 @@ while 1:
 
     if running:
         # Advance the countdown clock
-        timechanged = countdown.tick(elapsed)
+        timechanged = timer.tick(elapsed)
 
         # Track mouse movement, if no sound is playing
         if not pygame.mixer.get_busy():
@@ -165,22 +163,25 @@ while 1:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        if event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 escape = 1000
             elif escape > 0:
                 escape = 0
                 do_command(chr(event.key))
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN:
             if not running:
                 log('Clock started')
                 running = True
-        if event.type == pygame.USEREVENT:
+        elif event.type == pygame.USEREVENT:
             game.winEvent()
+        elif event.type == pygame.USEREVENT+1:
+            log('Out of time')
+            pygame.mixer.Sound('timeout.wav').play(loops=4)
 
     if timechanged:
         screen = pygame.display.get_surface()
         screen.fill((0,0,0))
-        countdown.draw(screen)
+        timer.draw(screen)
         pygame.display.flip()
         timechanged = False
