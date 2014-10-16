@@ -131,7 +131,7 @@ tracker = tracking.MouseTrack(game.recognizers)
 
 # Create a pygame Clock to track elapsed time
 pyclock = pygame.time.Clock()
-timer = countdown.CountdownTimer(10)
+timer = countdown.CountdownTimer(3600)
 
 # Flag true if countdown is running
 running = False
@@ -177,6 +177,7 @@ while 1:
             game.winEvent()
         elif event.type == pygame.USEREVENT+1:
             log('Out of time')
+            pygame.mixer.stop()
             pygame.mixer.Sound('timeout.wav').play(loops=4)
 
     if timechanged:
