@@ -60,9 +60,6 @@ class CountdownTimer:
         else:
             return False
 
-    def outoftime(self):
-        return self.time < 0
-
     def tick(self,timepassed):
         """Decrease current time by timepassed (ms) and rebuild image.
            Return True if display has changed."""
