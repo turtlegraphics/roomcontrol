@@ -28,45 +28,49 @@ class CountdownTimer:
     """Create a countdown timer on screen"""
     def __init__(self,time):
         """Set up a timer with time seconds available."""
-        self.timeleft = time
+        # self.time tracks time left in full accuracy.
+        self.time = time
+        # self.oldtime is the last rendered time string
         self.oldtime = None
 
         pygame.font.init()
         self.font = pygame.font.Font(None, 256)  # 256 point
-        self.render(time)
+        self.render()
         
         # set 1/2 image width only once, at start, so it doesn't jitter
         (self.mx,self.my) = self.image.get_rect().center
 
-    def render(self,time):
-        """Build the text image of the given time."""
-        if time == 0:
-            color = pygame.Color('red')
+    def __str__(self):
+        t = round(self.time,1)
+        minutes = int(t/60)
+        seconds = t - 60*minutes
+        return '%02d:%04.1f' % (minutes,seconds)
+
+    def render(self):
+        """Build the text image of the given time.  Return True if changed."""
+        timestr = str(self)
+        if timestr != self.oldtime:
+            if self.time == 0:
+                color = pygame.Color('red')
+            else:
+                color = pygame.Color('white')
+            self.image = self.font.render(timestr,True,color)
+            self.oldtime = timestr
+            return True
         else:
-            color = pygame.Color('white')
-        minutes = int(time/60)
-        seconds = time - 60*minutes
-        timestr = '%02d:%04.1f' % (minutes,seconds)
-        self.image = self.font.render(timestr,True,color)
+            return False
 
     def outoftime(self):
-        return self.timeleft < 0
+        return self.time < 0
 
     def tick(self,timepassed):
         """Decrease current time by timepassed (ms) and rebuild image.
            Return True if display has changed."""
-        self.timeleft -= float(timepassed)/1000.0
+        self.time -= float(timepassed)/1000.0
+        if self.time < 0:
+            self.time = 0
 
-        time = round(self.timeleft,1)
-        if time < 0:
-            time = 0
-
-        if time != self.oldtime:
-            self.render(time)
-            self.oldtime = time
-            return True
-
-        return False
+        return self.render()
 
     def draw(self,surf):
         (cx,cy) = surf.get_rect().center
