@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 """
 
 import sys,os
+import time
 import pygame, pygame.time
 from pygame.locals import *
 
@@ -86,6 +87,12 @@ def do_command(key):
             print 'Training for',training
         tracker.train(training)
 
+def log(msg):
+    """Write msg to the logfile for this run."""
+    global logfile
+    global countdown
+    logfile.write(str(countdown)+' '+msg+'\n')
+
 #
 #
 #  Program starts here.
@@ -112,6 +119,10 @@ pygame.event.set_grab(True)
 datadir = sys.argv[1]
 if not os.path.isdir(datadir):
     raise ValueError('Not a directory: '+datadir)
+
+# Create logfile.  Very lazy - global, and not closed on exit.
+logfilename = 'roomlog'+time.strftime('%m-%d %H-%M.txt')
+logfile = open(os.path.join(datadir,logfilename),'w')
 
 # Create spirit game control
 game = gamecontrol.Game(datadir)
@@ -148,6 +159,7 @@ while 1:
         if not pygame.mixer.get_busy():
             spirit = tracker.tick(elapsed)
             if spirit:
+                log(spirit.name + ' invoked')
                 game.detected(spirit)
 
     for event in pygame.event.get():
@@ -160,7 +172,9 @@ while 1:
                 escape = 0
                 do_command(chr(event.key))
         if event.type == pygame.MOUSEBUTTONDOWN:
-            running = True
+            if not running:
+                log('Clock started')
+                running = True
         if event.type == pygame.USEREVENT:
             game.winEvent()
 
