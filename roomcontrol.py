@@ -27,7 +27,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 """
 
 import sys,os
-import time
 import pygame, pygame.time
 from pygame.locals import *
 
@@ -35,6 +34,7 @@ from pygame.locals import *
 import countdown
 import gamecontrol
 import tracking
+from logging import logger
 
 def toggle_fullscreen():
     screen = pygame.display.get_surface()
@@ -86,12 +86,6 @@ def do_command(key):
             print 'Training for',training
         tracker.train(training)
 
-def log(msg):
-    """Write msg to the logfile for this run."""
-    global logfile
-    global timer
-    logfile.write(str(timer)+' '+msg+'\n')
-
 #
 #
 #  Program starts here.
@@ -104,6 +98,13 @@ if len(sys.argv) not in [2,3]:
     print 'Usage: roomcontrol audiopath [trainWORD]'
     sys.exit(1)
 
+datadir = sys.argv[1]
+if not os.path.isdir(datadir):
+    raise ValueError('Not a directory: '+datadir)
+
+# create logfile
+logger.open(datadir)
+
 # Initialize
 pygame.init()
 
@@ -114,13 +115,8 @@ pygame.display.set_mode((800,800))
 pygame.mouse.set_visible(False)
 pygame.event.set_grab(True)
 
-datadir = sys.argv[1]
-if not os.path.isdir(datadir):
-    raise ValueError('Not a directory: '+datadir)
-
-# Create logfile.  Very lazy - global, and not closed on exit.
-logfilename = 'roomlog'+time.strftime('%m-%d %H-%M.txt')
-logfile = open(os.path.join(datadir,logfilename),'w')
+# Create a pygame Clock to track elapsed time
+pyclock = pygame.time.Clock()
 
 # Create spirit game control
 game = gamecontrol.Game(datadir)
@@ -128,10 +124,6 @@ game = gamecontrol.Game(datadir)
 # Create mouse tracking
 training = None
 tracker = tracking.MouseTrack(game.recognizers)
-
-# Create a pygame Clock to track elapsed time
-pyclock = pygame.time.Clock()
-timer = countdown.CountdownTimer(3600)
 
 # Flag true if countdown is running
 running = False
@@ -151,13 +143,13 @@ while 1:
 
     if running:
         # Advance the countdown clock
-        timechanged = timer.tick(elapsed)
+        timechanged = countdown.timer.tick(elapsed)
 
         # Track mouse movement, if no sound is playing
         if not pygame.mixer.get_busy():
             spirit = tracker.tick(elapsed)
             if spirit:
-                log(spirit.name + ' invoked')
+                logger.log(spirit.name + ' invoked')
                 game.detected(spirit)
 
     for event in pygame.event.get():
@@ -171,18 +163,18 @@ while 1:
                 do_command(chr(event.key))
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if not running:
-                log('Clock started')
+                logger.log('Clock started')
                 running = True
         elif event.type == pygame.USEREVENT:
             game.winEvent()
         elif event.type == pygame.USEREVENT+1:
-            log('Out of time')
+            logger.log('Out of time')
             pygame.mixer.stop()
             pygame.mixer.Sound('timeout.wav').play(loops=4)
 
     if timechanged:
         screen = pygame.display.get_surface()
         screen.fill((0,0,0))
-        timer.draw(screen)
+        countdown.timer.draw(screen)
         pygame.display.flip()
         timechanged = False

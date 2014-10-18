@@ -79,3 +79,5 @@ class CountdownTimer:
     def draw(self,surf):
         (cx,cy) = surf.get_rect().center
         surf.blit(self.image,(cx-self.mx,cy-self.my))
+
+timer = CountdownTimer(3600)
