@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 import pygame
 import math
+from logging import logger
 
 # Used for color terminal output
 class bcolors:
@@ -90,6 +91,7 @@ class MouseTrack:
         self.path = []
         self.people = people
         self.learning = None
+        self.notyetmoved = True
 
     def train(self, who):
         """Pass a string to supress recognition, but produce path output
@@ -136,6 +138,10 @@ class MouseTrack:
                     if self.current.length() > 100:
                         # only pay attention to real moves, not twitches
                         # print 'moved by:',self.current
+                        if self.notyetmoved:
+                            logger.log('Mouse first moved.')
+                            self.notyetmoved = False
+
                         self.path.append(self.current)
                         if self.learning:
                             if len(self.path) >= len(self.learning)-1:
