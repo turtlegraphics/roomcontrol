@@ -53,47 +53,109 @@ def toggle_fullscreen():
 
     pygame.mouse.set_visible(False)
     pygame.event.set_grab(True)
- 
-# Command handlers
-def do_command(key):
-    """
-    Commands are ESC-key, where key is one of:
-    q: Quit
-    p: Pause/resume
-    f: Toggle fullscreen
-    a: Audio test
-    (Also note you only have 1 second after ESC to hit the key)
-    """
-    if key == 'q':
-        sys.exit()
-    elif key == 'p':
-        global running
-        running = not running
-    elif key == 'f':
-        toggle_fullscreen()
-        global timechanged
-        timechanged = True
-    elif key == 'a':
-        print 'Audio check playing...'
-        pygame.mixer.Sound('soundcheck.wav').play()
-    elif key == 't':
-        global training
-        if training:
-            training = None
-            print 'Training off.'
-        else:
-            training = sys.argv[2]
-            print 'Training for',training
-        tracker.train(training)
+
+class RoomController:
+    def __init__(self):
+        # Create a pygame Clock to track elapsed time
+        self.pyclock = pygame.time.Clock()
+
+        # Create spirit game control
+        self.game = gamecontrol.Game(datadir)
+
+        # Create mouse tracking
+        self.training = None
+        self.tracker = tracking.MouseTrack(self.game.recognizers)
+
+        # Flag true if countdown is running
+        self.running = False
+
+        # How much time left on last ESC key pressed (ms)
+        self.escape = 0
+
+        # Flag to tell if screen needs refresh
+        self.timechanged = True
+
+    def run(self):
+        # main loop
+        while 1:
+            elapsed = self.pyclock.tick(50);
+
+            # Timeout escape key press
+            self.escape = max(0,self.escape - elapsed)
+
+            if self.running:
+                # Advance the countdown clock
+                self.timechanged = countdown.timer.tick(elapsed)
+
+                # Track mouse movement, if no sound is playing
+                if not pygame.mixer.get_busy():
+                    spirit = self.tracker.tick(elapsed)
+                    if spirit:
+                        self.game.detected(spirit)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    logger.close()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.escape = 600
+                    elif self.escape > 0:
+                        self.escape = 0
+                        self.do_command(chr(event.key))
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if not self.running:
+                        logger.log('Clock started')
+                        self.running = True
+                elif event.type == pygame.USEREVENT:
+                    self.game.winEvent()
+                elif event.type == pygame.USEREVENT+1:
+                    logger.log('Out of time')
+                    pygame.mixer.stop()
+                    pygame.mixer.Sound('timeout.wav').play(loops=4)
+
+            if self.timechanged:
+                screen = pygame.display.get_surface()
+                screen.fill((0,0,0))
+                countdown.timer.draw(screen)
+                pygame.display.flip()
+                self.timechanged = False
+
+    # Command handlers
+    def do_command(self,key):
+        """
+        Commands are ESC-key, where key is one of:
+        q: Quit
+        p: Pause/resume
+        f: Toggle fullscreen
+        a: Audio test
+        (Also note you only have 1 second after ESC to hit the key)
+        """
+        if key == 'q':
+            pygame.event.post(pygame.event.Event(pygame.QUIT))
+        elif key == 'p':
+            self.running = not self.running
+        elif key == 'f':
+            toggle_fullscreen()
+            self.timechanged = True
+        elif key == 'a':
+            print 'Audio check playing...'
+            pygame.mixer.Sound('soundcheck.wav').play()
+        elif key == 't':
+            if self.training:
+                self.training = None
+                print 'Training off.'
+            else:
+                self.training = sys.argv[2]
+                print 'Training for',training
+            tracker.train(self.training)
 
 #
-#
-#  Program starts here.
-#
+# Program begins here
 #
 
 print 'Pygame version',pygame.version.ver
-print do_command.__doc__
+print RoomController.do_command.__doc__
 if len(sys.argv) not in [2,3]:
     print 'Usage: roomcontrol audiopath [trainWORD]'
     sys.exit(1)
@@ -115,66 +177,4 @@ pygame.display.set_mode((800,800))
 pygame.mouse.set_visible(False)
 pygame.event.set_grab(True)
 
-# Create a pygame Clock to track elapsed time
-pyclock = pygame.time.Clock()
-
-# Create spirit game control
-game = gamecontrol.Game(datadir)
-
-# Create mouse tracking
-training = None
-tracker = tracking.MouseTrack(game.recognizers)
-
-# Flag true if countdown is running
-running = False
-
-# How much time left on last ESC key pressed (ms)
-escape = 0
-
-# Flag to tell if screen needs refresh
-timechanged = True
-
-# main loop
-while 1:
-    elapsed = pyclock.tick(50);
-
-    # Timeout escape key press
-    escape = max(0,escape - elapsed)
-
-    if running:
-        # Advance the countdown clock
-        timechanged = countdown.timer.tick(elapsed)
-
-        # Track mouse movement, if no sound is playing
-        if not pygame.mixer.get_busy():
-            spirit = tracker.tick(elapsed)
-            if spirit:
-                logger.log(spirit.name + ' invoked')
-                game.detected(spirit)
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                escape = 1000
-            elif escape > 0:
-                escape = 0
-                do_command(chr(event.key))
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if not running:
-                logger.log('Clock started')
-                running = True
-        elif event.type == pygame.USEREVENT:
-            game.winEvent()
-        elif event.type == pygame.USEREVENT+1:
-            logger.log('Out of time')
-            pygame.mixer.stop()
-            pygame.mixer.Sound('timeout.wav').play(loops=4)
-
-    if timechanged:
-        screen = pygame.display.get_surface()
-        screen.fill((0,0,0))
-        countdown.timer.draw(screen)
-        pygame.display.flip()
-        timechanged = False
+RoomController().run()

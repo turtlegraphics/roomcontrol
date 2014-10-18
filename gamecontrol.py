@@ -23,6 +23,7 @@ import os
 import pygame
 
 from tracking import Recognizer
+from logging import logger
 
 SOUNDEXT = '.wav'
 
@@ -48,6 +49,8 @@ class Game:
     def detected(self,who):
         """Called when a mouse sequence is detected.
            who is the Recognizer for that sequence."""
+        logger.log(who.name + ' invoked')
+
         if who.name not in self.played:
             self.played.append(who.name)
             self.playtrack(who.name,0)
@@ -57,7 +60,7 @@ class Game:
         if not self.got5 and len(self.played) == 5:
             print 'Got all five.'
             self.got5 = True
-            # trigger an event 90 seconds later
+            # trigger an event with delay
             pygame.time.set_timer(pygame.USEREVENT,60000)
 
     def winEvent(self):
