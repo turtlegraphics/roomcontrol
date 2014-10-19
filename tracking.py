@@ -135,13 +135,14 @@ class MouseTrack:
                 if self.stilltime > pause_threshold:
                     self.still = True
                     self.current.set_movetime(self.movetime - self.stilltime)
+
+                    if self.current.length() > 500 and self.notyetmoved:
+                        # log first big move
+                        logger.log('Mouse first moved.')
+                        self.notyetmoved = False
+
                     if self.current.length() > 100:
                         # only pay attention to real moves, not twitches
-                        # print 'moved by:',self.current
-                        if self.notyetmoved:
-                            logger.log('Mouse first moved.')
-                            self.notyetmoved = False
-
                         self.path.append(self.current)
                         if self.learning:
                             if len(self.path) >= len(self.learning)-1:
