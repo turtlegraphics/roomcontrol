@@ -136,7 +136,7 @@ class MouseTrack:
                     self.still = True
                     self.current.set_movetime(self.movetime - self.stilltime)
 
-                    if self.current.length() > 500 and self.notyetmoved:
+                    if  self.notyetmoved and self.current.length() > 500:
                         # log first big move
                         logger.log('Mouse first moved.')
                         self.notyetmoved = False
@@ -177,10 +177,9 @@ class Recognizer:
         for i in range(len(a)):
             ssa += (a[i]-self.angles[i])**2
 
-        fit = math.log(ssd)+2*math.log(ssa)
+        angle_weight = 2
+        fit = math.log(ssd) + angle_weight*math.log(ssa)
         self.displayfit(fit)
-        if fit < 15:
-            print 'Angles:',ssa,'Dists:',ssd
         return fit < self.threshold
 
     def __len__(self):
