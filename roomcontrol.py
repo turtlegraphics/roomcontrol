@@ -172,7 +172,7 @@ pygame.init()
 
 pygame.mixer.init()
 
-pygame.display.set_mode((800,800))
+pygame.display.set_mode((650,200))
 
 pygame.mouse.set_visible(False)
 pygame.event.set_grab(True)
