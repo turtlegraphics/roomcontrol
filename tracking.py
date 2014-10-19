@@ -179,6 +179,8 @@ class Recognizer:
 
         fit = math.log(ssd)+2*math.log(ssa)
         self.displayfit(fit)
+        if fit < 15:
+            print 'Angles:',ssa,'Dists:',ssd
         return fit < self.threshold
 
     def __len__(self):
