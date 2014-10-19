@@ -148,7 +148,7 @@ class RoomController:
             else:
                 self.training = sys.argv[2]
                 print 'Training for',self.training
-            tracker.train(self.training)
+            self.tracker.train(self.training)
 
 #
 # Program begins here
