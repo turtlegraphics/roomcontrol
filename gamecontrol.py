@@ -36,6 +36,7 @@ class Game:
 
         self.recognizers = []
         self.sounds = {}
+        self.silent = False
 
         self.datadir = datadir
         self.readdata(os.path.join(self.datadir,'tracking.txt'))
@@ -44,7 +45,15 @@ class Game:
     def playtrack(self,who,track):
         """Play an audio track from the directory datadir/audio"""
         print 'Playing',who,' track ',track+1
-        self.sounds[who][track].play()
+        if not self.silent:
+            self.sounds[who][track].play()
+
+    def toggle_silent(self):
+        self.silent = not self.silent
+        if self.silent:
+            print 'Running in silent mode'
+        else:
+            print 'Silent mode off, running normally.'
 
     def detected(self,who):
         """Called when a mouse sequence is detected.

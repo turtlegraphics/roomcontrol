@@ -129,6 +129,8 @@ class RoomController:
         p: Pause/resume
         f: Toggle fullscreen
         a: Audio test
+        s: Silent mode
+        t: Training mode
         (Also note you only have 1 second after ESC to hit the key)
         """
         if key == 'q':
@@ -141,6 +143,8 @@ class RoomController:
         elif key == 'a':
             print 'Audio check playing...'
             pygame.mixer.Sound('soundcheck.wav').play()
+        elif key == 's':
+            self.game.toggle_silent()
         elif key == 't':
             if self.training:
                 self.training = None
